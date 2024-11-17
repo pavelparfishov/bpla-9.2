@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+
+#define LED_PIN GPIO_NUM_2 // Стандартный светодиод на платах ESP32
+
+void LED_Task(void *pvParameters) {
+    gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
+
+    for (;;) {
+        gpio_set_level(LED_PIN, 1); // Включить светодиод
+        vTaskDelay(pdMS_TO_TICKS(500)); // Задержка 500 мс
+        gpio_set_level(LED_PIN, 0); // Выключить светодиод
+        vTaskDelay(pdMS_TO_TICKS(500)); // Задержка 500 мс
+    }
+}
+
+void app_main(void) {
+    // Создание задачи
+    xTaskCreate(LED_Task, "LED_Task", 2048, NULL, 1, NULL);
+}
