@@ -1,0 +1,36 @@
+#include "FreeRTOS.h"
+#include "task.h"
+#include "stm32f4xx_hal.h"
+
+// Инициализация светодиода (предполагается, что он подключен к порту GPIOA, PIN_5)
+void LED_Init(void) {
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+// Задача для мигания светодиода
+void LED_Task(void *pvParameters) {
+    for (;;) {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        vTaskDelay(pdMS_TO_TICKS(500)); // Задержка 500 мс
+    }
+}
+
+int main(void) {
+    HAL_Init();
+    LED_Init();
+
+    // Создание задачи
+    xTaskCreate(LED_Task, "LED_Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+
+    // Запуск планировщика
+    vTaskStartScheduler();
+
+    // Код сюда не должен дойти
+    while (1);
+}
